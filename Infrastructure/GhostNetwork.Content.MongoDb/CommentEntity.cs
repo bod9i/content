@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using System;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace GhostNetwork.Content.MongoDb
@@ -10,8 +11,12 @@ namespace GhostNetwork.Content.MongoDb
         [BsonElement("content")]
         public string Content { get; set; }
 
+        [Obsolete]
         [BsonElement("publicationId")]
         public string PublicationId { get; set; }
+
+        [BsonElement("entityKey")]
+        public string EntityKey { get; set; }
 
         [BsonElement("createOn")]
         public long CreateOn { get; set; }

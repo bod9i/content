@@ -36,9 +36,9 @@ namespace GhostNetwork.Content.Comments
             return commentStorage.FindOneByIdAsync(id);
         }
 
-        public async Task<(IEnumerable<Comment>, long)> SearchAsync(string publicationId, int skip, int take)
+        public async Task<(IEnumerable<Comment>, long)> SearchAsync(string entityKey, int skip, int take)
         {
-            return await commentStorage.FindManyAsync(publicationId, skip, take);
+            return await commentStorage.FindManyAsync(entityKey, skip, take);
         }
 
         public Task<Dictionary<string, FeaturedInfo>> SearchFeaturedAsync(string[] ids)

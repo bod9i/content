@@ -5,8 +5,11 @@ namespace GhostNetwork.Content.Api.Models
 {
     public class CreateCommentModel
     {
+        [Obsolete]
         [Required]
         public string PublicationId { get; set; }
+
+        public string EntityKey { get; set; }
 
         [Required]
         public string Content { get; set; }

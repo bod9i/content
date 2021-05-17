@@ -35,7 +35,7 @@ namespace GhostNetwork.Content.Api.Controllers
             var author = await userProvider.GetByIdAsync(model.AuthorId);
 
 #pragma warning disable 612
-            var (domainResult, id) = await commentService.CreateAsync(model.PublicationId, model.Content, model.ReplyCommentId, author ?? (UserInfo)model.Author);
+            var (domainResult, id) = await commentService.CreateAsync(model.EntityKey, model.Content, model.ReplyCommentId, author ?? (UserInfo)model.Author);
 #pragma warning restore 612
 
             if (domainResult.Successed)

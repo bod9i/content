@@ -39,7 +39,7 @@ namespace GhostNetwork.Content.MongoDb
             {
                 Content = comment.Content,
                 CreateOn = comment.CreatedOn.ToUnixTimeMilliseconds(),
-                PublicationId = comment.PublicationId,
+                EntityKey = comment.EntityKey,
                 ReplyCommentId = comment.ReplyCommentId,
                 Author = (UserInfoEntity)comment.Author
             };
@@ -51,7 +51,7 @@ namespace GhostNetwork.Content.MongoDb
 
         public async Task<(IEnumerable<Comment>, long)> FindManyAsync(string publicationId, int skip, int take)
         {
-            var filter = Builders<CommentEntity>.Filter.Eq(x => x.PublicationId, publicationId);
+            var filter = Builders<CommentEntity>.Filter.Eq(x => x.EntityKey, publicationId);
 
             var totalCount = await context.Comments
                 .Find(filter)
@@ -75,7 +75,7 @@ namespace GhostNetwork.Content.MongoDb
                 return false;
             }
 
-            var filter = Builders<CommentEntity>.Filter.Eq(x => x.PublicationId, publicationId) &
+            var filter = Builders<CommentEntity>.Filter.Eq(x => x.EntityKey, publicationId) &
                          Builders<CommentEntity>.Filter.Eq(x => x.Id, id);
 
             return await context.Comments.Find(filter).AnyAsync();
@@ -83,7 +83,7 @@ namespace GhostNetwork.Content.MongoDb
 
         public async Task DeleteByPublicationAsync(string publicationId)
         {
-            var filter = Builders<CommentEntity>.Filter.Eq(x => x.PublicationId, publicationId);
+            var filter = Builders<CommentEntity>.Filter.Eq(x => x.EntityKey, publicationId);
 
             await context.Comments.DeleteManyAsync(filter);
         }
@@ -104,7 +104,7 @@ namespace GhostNetwork.Content.MongoDb
         {
             var group = new BsonDocument
             {
-                { "_id", "$publicationId" },
+                { "_id", "$entityKey" },
                 {
                     "comments", new BsonDocument
                     {
@@ -135,7 +135,7 @@ namespace GhostNetwork.Content.MongoDb
 
             var listComments = await context.Comments
                 .Aggregate()
-                .Match(Builders<CommentEntity>.Filter.In(x => x.PublicationId, publicationsIds))
+                .Match(Builders<CommentEntity>.Filter.In(x => x.EntityKey, publicationsIds))
                 .Sort(Builders<CommentEntity>.Sort.Ascending(x => x.CreateOn))
                 .Group<FeaturedInfoEntity>(group)
                 .Project<FeaturedInfoEntity>(slice.ToBsonDocument())
@@ -164,7 +164,7 @@ namespace GhostNetwork.Content.MongoDb
                 entity.Id.ToString(),
                 entity.Content,
                 DateTimeOffset.FromUnixTimeMilliseconds(entity.CreateOn),
-                entity.PublicationId,
+                entity.EntityKey,
                 entity.ReplyCommentId,
                 (UserInfo)entity.Author);
         }
