@@ -9,9 +9,9 @@ namespace GhostNetwork.Content.Comments
     {
         Task<Comment> GetByIdAsync(string id);
 
-        Task<(IEnumerable<Comment>, long)> SearchAsync(string publicationId, int skip, int take);
+        Task<(IEnumerable<Comment>, long)> SearchAsync(string entityKey, int skip, int take);
 
-        Task<(DomainResult, string)> CreateAsync(string publicationId, string text, string replyCommentId, UserInfo author);
+        Task<(DomainResult, string)> CreateAsync(string entityKey, string text, string replyCommentId, UserInfo author);
 
         Task DeleteAsync(string id);
 
@@ -46,7 +46,7 @@ namespace GhostNetwork.Content.Comments
             return commentStorage.FindFeaturedAsync(ids);
         }
 
-        public async Task<(DomainResult, string)> CreateAsync(string publicationId, string text, string replyId, UserInfo author)
+        public async Task<(DomainResult, string)> CreateAsync(string entityKey, string text, string replyId, UserInfo author)
         {
             var result = await validator.ValidateAsync(new CommentContext(text, replyId));
             if (!result.Successed)
@@ -54,7 +54,7 @@ namespace GhostNetwork.Content.Comments
                 return (result, null);
             }
 
-            var comment = Comment.New(text, publicationId, replyId, author);
+            var comment = Comment.New(text, entityKey, replyId, author);
             var id = await commentStorage.InsertOneAsync(comment);
 
             return (DomainResult.Success(), id);

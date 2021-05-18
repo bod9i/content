@@ -49,9 +49,9 @@ namespace GhostNetwork.Content.MongoDb
             return entity.Id.ToString();
         }
 
-        public async Task<(IEnumerable<Comment>, long)> FindManyAsync(string publicationId, int skip, int take)
+        public async Task<(IEnumerable<Comment>, long)> FindManyAsync(string entityKey, int skip, int take)
         {
-            var filter = Builders<CommentEntity>.Filter.Eq(x => x.EntityKey, publicationId);
+            var filter = Builders<CommentEntity>.Filter.Eq(x => x.EntityKey, entityKey);
 
             var totalCount = await context.Comments
                 .Find(filter)
@@ -68,22 +68,22 @@ namespace GhostNetwork.Content.MongoDb
                 .ToList(), totalCount);
         }
 
-        public async Task<bool> IsCommentInPublicationAsync(string commentId, string publicationId)
+        public async Task<bool> IsCommentInPublicationAsync(string commentId, string entityKey)
         {
             if (!ObjectId.TryParse(commentId, out var id))
             {
                 return false;
             }
 
-            var filter = Builders<CommentEntity>.Filter.Eq(x => x.EntityKey, publicationId) &
+            var filter = Builders<CommentEntity>.Filter.Eq(x => x.EntityKey, entityKey) &
                          Builders<CommentEntity>.Filter.Eq(x => x.Id, id);
 
             return await context.Comments.Find(filter).AnyAsync();
         }
 
-        public async Task DeleteByPublicationAsync(string publicationId)
+        public async Task DeleteByPublicationAsync(string entityKey)
         {
-            var filter = Builders<CommentEntity>.Filter.Eq(x => x.EntityKey, publicationId);
+            var filter = Builders<CommentEntity>.Filter.Eq(x => x.EntityKey, entityKey);
 
             await context.Comments.DeleteManyAsync(filter);
         }
@@ -100,7 +100,7 @@ namespace GhostNetwork.Content.MongoDb
             await context.Comments.DeleteOneAsync(filter);
         }
 
-        public async Task<Dictionary<string, FeaturedInfo>> FindFeaturedAsync(string[] publicationsIds)
+        public async Task<Dictionary<string, FeaturedInfo>> FindFeaturedAsync(string[] entityKeys)
         {
             var group = new BsonDocument
             {
@@ -135,7 +135,7 @@ namespace GhostNetwork.Content.MongoDb
 
             var listComments = await context.Comments
                 .Aggregate()
-                .Match(Builders<CommentEntity>.Filter.In(x => x.EntityKey, publicationsIds))
+                .Match(Builders<CommentEntity>.Filter.In(x => x.EntityKey, entityKeys))
                 .Sort(Builders<CommentEntity>.Sort.Ascending(x => x.CreateOn))
                 .Group<FeaturedInfoEntity>(group)
                 .Project<FeaturedInfoEntity>(slice.ToBsonDocument())
@@ -148,7 +148,7 @@ namespace GhostNetwork.Content.MongoDb
                         r.Comments.Select(ToDomain),
                         r.TotalCount));
 
-            return publicationsIds
+            return entityKeys
                 .ToDictionary(
                     publicationId => publicationId,
                     publicationId => dict.ContainsKey(publicationId)
