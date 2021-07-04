@@ -12,6 +12,8 @@ namespace GhostNetwork.Content.Comments
         Task<Dictionary<string, FeaturedInfo>> FindFeaturedAsync(IEnumerable<string> keys);
 
         Task<string> InsertOneAsync(Comment comment);
+        
+        Task<Comment> UpdateOneAsync(string commentId, string content);
 
         Task DeleteByKeyAsync(string key);
 
