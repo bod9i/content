@@ -1,0 +1,28 @@
+name: Generate gateway http-client from angular
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version of nuget package'
+        required: true
+env:
+  PACKAGE_NAME: GhostNetwork.Content
+  PACKAGE_REGISTRY: https://api.nuget.org/v3/index.json
+
+jobs:
+  generate-client:
+    runs-on: ubuntu-20.04
+    
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install generator
+        run: npm install @openapitools/openapi-generator-cli
+      - name: Run service instance
+        run: docker-compose up -d
+      - name: generate-package
+        run: |
+          npx @openapitools/openapi-generator-cli generate -i http://localhost:5000/swagger/v1/swagger.json \
+            -g typescript-angular \
+            -o backend \
+            --additional-properties npmName=@modules/api,snapshot=true,ngVersion=1.0.0
